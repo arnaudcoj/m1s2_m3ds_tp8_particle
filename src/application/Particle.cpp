@@ -38,7 +38,7 @@ void Particle::initRandom() {
     //this->velocity(2.0*Vector3(randDouble(-1,1),randDouble(0,5),randDouble(-1,1)));
 
     //E3Q1
-    this->position(Vector3(randDouble(-1,1),5.,0));
+    this->position(Vector3(randDouble(-1,1),5.,randDouble(-1,1)));
     this->velocity(Vector3(0., 0., 0.));
 
     _timeOfLife=randDouble(4,10); // en secondes
