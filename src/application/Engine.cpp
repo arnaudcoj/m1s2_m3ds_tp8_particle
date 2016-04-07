@@ -84,9 +84,13 @@ void Engine::collisionPlane() {
         Vector3 n(plane->normal());
         Vector3 pp(p->position());
 
+        //E3Q2
+        //on prend en compte le rayon de la sphère
+        Vector3 pSphere(pp.x(), pp.y() - p->radius(), pp.z());
+
         //E2Q3
         //si AP.n est < 0, alors P est derrière le plan (chap7 p22)
-        if(Vector3(a,pp).dot(n) < 0) {
+        if(Vector3(a,pSphere).dot(n) < 0) {
             Vector3 vp(p->velocity());
 
             //H est le projeté orthogonal de P sur le plan.
@@ -97,7 +101,12 @@ void Engine::collisionPlane() {
             //p->velocity(Vector3(0., 0., 0.));
 
             //E2Q4
-            posCorrection.add(0., plane->point().y() - pp.y(), 0.);
+            //posCorrection.add(0., plane->point().y() - pp.y(), 0.);
+            //velCorrection.add(-vp.x(), -vp.y(), -vp.z());
+
+            //E3Q2
+            //on prend en compte le rayon de la sphère
+            posCorrection.add(0., plane->point().y() - pSphere.y() , 0.);
             velCorrection.add(-vp.x(), -vp.y(), -vp.z());
 
             //E2Q5
@@ -106,7 +115,7 @@ void Engine::collisionPlane() {
             Vector3 vnew = vp.dot(n) * n;
 
             //On ajoute à nouveau la distance entre le plan et le point, en la diminuant en fonction de la restitution
-            posCorrection.add(0., (plane->point().y() - pp.y()) * restitution, 0.);
+            posCorrection.add(0., (plane->point().y() - pSphere.y()) * restitution, 0.);
             //on oppose la vitesse normale (restitution près), ce qui fait que la balle va se diriger vers le haut => rebond
             //la restitution permet de diminuer la vitesse à chaque rebond => effet + réaliste
             velCorrection.add(-vnew * restitution);
