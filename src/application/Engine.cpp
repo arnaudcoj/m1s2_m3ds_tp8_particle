@@ -14,6 +14,8 @@
 using namespace std;
 using namespace p3d;
 
+//E2Q5
+double restitution = 0.5;
 
 
 /** Intégration du mouvement
@@ -84,9 +86,13 @@ void Engine::collisionPlane() {
         Vector3 n(plane->normal());
         Vector3 pp(p->position());
 
+        //E3Q2
+        //on prend en compte le rayon de la sphère
+        Vector3 pSphere(pp.x(), pp.y() - p->radius(), pp.z());
+
         //E2Q3
         //si AP.n est < 0, alors P est derrière le plan (chap7 p22)
-        if(Vector3(a,pp).dot(n) < 0) {
+        if(Vector3(a,pSphere).dot(n) < 0) {
             Vector3 vp(p->velocity());
 
             //H est le projeté orthogonal de P sur le plan.
@@ -97,16 +103,19 @@ void Engine::collisionPlane() {
             //p->velocity(Vector3(0., 0., 0.));
 
             //E2Q4
-            posCorrection.add(0., plane->point().y() - pp.y(), 0.);
+            //posCorrection.add(0., plane->point().y() - pp.y(), 0.);
+            //velCorrection.add(-vp.x(), -vp.y(), -vp.z());
+
+            //E3Q2
+            //on prend en compte le rayon de la sphère
+            posCorrection.add(0., plane->point().y() - pSphere.y() , 0.);
             velCorrection.add(-vp.x(), -vp.y(), -vp.z());
 
-            //E2Q5
-            double restitution = 0.5;
             //vitesse normale (chap7 p23)
             Vector3 vnew = vp.dot(n) * n;
 
             //On ajoute à nouveau la distance entre le plan et le point, en la diminuant en fonction de la restitution
-            posCorrection.add(0., (plane->point().y() - pp.y()) * restitution, 0.);
+            posCorrection.add(0., (plane->point().y() - pSphere.y()) * restitution, 0.);
             //on oppose la vitesse normale (restitution près), ce qui fait que la balle va se diriger vers le haut => rebond
             //la restitution permet de diminuer la vitesse à chaque rebond => effet + réaliste
             velCorrection.add(-vnew * restitution);
@@ -154,8 +163,36 @@ void Engine::interCollision() {
           Vector3 posCorrectionP2(0,0,0); // correction en position de P2
           Vector3 velCorrectionP2(0,0,0); // correction en vitesse de P2
 
-          /* A COMPLETER */
+          Vector3 p1old(p1->position());
+          Vector3 p2old(p2->position());
 
+          //cours chap7 p30
+          Vector3 N(p2old - p1old);
+
+          if((p2old - p1old).length() < p2->radius() + p1->radius()) {
+
+              Vector3 v1old(p1->velocity());
+              Vector3 v2old(p2->velocity());
+
+              double m1 = p1->mass();
+              double m2 = p2->mass();
+
+              double j = -(1. + restitution) * (v2old - v1old).dot(N) / (1. / m1 + 1. / m2) * N.dot(N);
+
+              double D = (p2old - p1old).length() - p1->radius() - p2->radius();
+
+              Vector3 p1new(-(1 + restitution) * m2 / (m1 + m2) * D * N);
+              Vector3 p2new((1 + restitution) * m1 / (m1 + m2) * D * N);
+
+              Vector3 v1new(-(j / m1) * N);
+              Vector3 v2new((j / m2) * N);
+
+              posCorrectionP1.add(p1new);
+              velCorrectionP1.add(v1new);
+
+              posCorrectionP2.add(p2new);
+              velCorrectionP2.add(v2new);
+          }
 
           // appliquer la correction éventuelle :
           p1->addPositionCorrec(posCorrectionP1);
