@@ -84,13 +84,20 @@ void Engine::collisionPlane() {
         Vector3 n(plane->normal());
         Vector3 pp(p->position());
 
+        //E2Q3
         //si AP.n est < 0, alors P est derrière le plan (chap7 p22)
         if(Vector3(a,pp).dot(n) < 0) {
             //H est le projeté orthogonal de P sur le plan.
             //(on prend P auquel on donne le y du plan, H est sur le plan => HP est orthogonal au plan)
-            Vector3 H(pp.x(), plane->point().y(), pp.z());
-            p->position(H);
-            p->velocity(Vector3(0., 0., 0.));
+            //Vector3 H(pp.x(), plane->point().y(), pp.z());
+
+            //p->position(H);
+            //p->velocity(Vector3(0., 0., 0.));
+
+            //E2Q4
+            Vector3 vp(p->velocity());
+            posCorrection.add(0., plane->point().y() - pp.y(), 0.);
+            velCorrection.add(-vp.x(), -vp.y(), -vp.z());
         }
 
 
