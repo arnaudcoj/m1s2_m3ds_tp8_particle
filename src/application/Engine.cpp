@@ -14,6 +14,8 @@
 using namespace std;
 using namespace p3d;
 
+//E2Q5
+double restitution = 0.5;
 
 
 /** Intégration du mouvement
@@ -109,8 +111,6 @@ void Engine::collisionPlane() {
             posCorrection.add(0., plane->point().y() - pSphere.y() , 0.);
             velCorrection.add(-vp.x(), -vp.y(), -vp.z());
 
-            //E2Q5
-            double restitution = 0.5;
             //vitesse normale (chap7 p23)
             Vector3 vnew = vp.dot(n) * n;
 
@@ -163,8 +163,50 @@ void Engine::interCollision() {
           Vector3 posCorrectionP2(0,0,0); // correction en position de P2
           Vector3 velCorrectionP2(0,0,0); // correction en vitesse de P2
 
-          /* A COMPLETER */
+          //E3Q4
 
+          //On récupère les anciennes positions
+          Vector3 p1old(p1->position());
+          Vector3 p2old(p2->position());
+
+          //Calcul de la normale
+          //cours chap7 p30
+          Vector3 N(p2old - p1old);
+
+          //si la distance entre les 2 centres est plus petite que la somme des rayons, les 2 sphères sont en collisions
+          //cours chap7 p30
+          if((p2old - p1old).length() < p2->radius() + p1->radius()) {
+
+              //On récupère les anciennes vélocités
+              Vector3 v1old(p1->velocity());
+              Vector3 v2old(p2->velocity());
+
+              //... Et les masses
+              double m1 = p1->mass();
+              double m2 = p2->mass();
+
+              //On calcule le vecteur d'impulsion j (chap7 p29)
+              double j = -(1. + restitution) * (v2old - v1old).dot(N) / (1. / m1 + 1. / m2) * N.dot(N);
+
+              //On calcule la longueur de l'intersection entre les 2 sphères
+              double D = (p2old - p1old).length() - p1->radius() - p2->radius();
+
+              //Déplacement de la position du point. chap7 p30.
+              //on enlève p1old etc. car déjà géré avec addPositionCorrec etc.
+              Vector3 p1new((1 + restitution) * (m1 / (m1 + m2)) * D * N);
+              Vector3 p2new(-(1 + restitution) * (m2 / (m1 + m2)) * D * N);
+
+              //Changement de vélocité du point. chap7 p29.
+              //on enlève v1old etc. car déjà géré avec addVelocityCorrec etc.
+              Vector3 v1new(-(j / m1) * N);
+              Vector3 v2new((j / m2) * N);
+
+              posCorrectionP1.add(p1new);
+              velCorrectionP1.add(v1new);
+
+              posCorrectionP2.add(p2new);
+              velCorrectionP2.add(v2new);
+          }
 
           // appliquer la correction éventuelle :
           p1->addPositionCorrec(posCorrectionP1);
