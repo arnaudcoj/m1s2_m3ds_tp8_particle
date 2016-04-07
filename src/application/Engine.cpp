@@ -30,8 +30,11 @@ void Engine::euler(double dt) {
   for(unsigned int i=0; i<_particleList->size(); i++) {
     Particle *p=(*_particleList)[i];
     if (p->alive()) {
-      /* A COMPLETER : affecter la nouvelle vitesse et la nouvelle position de p avec p->velocity(??), et p->position(??).
-      */
+
+        //E2Q1
+        //formules cours chap7 p18
+        p->position(p->position() + p->velocity() * dt);
+        p->velocity(p->velocity() + (p->force())/p->mass() * dt);
 
 
     }
