@@ -80,6 +80,20 @@ void Engine::collisionPlane() {
         /* on peut utiliser p->position(), p->velocity() (et les setters), et plane->point() et plane->normal() */
         /* p->radius() donne le rayon de la particule (exercice avec les sphère). */
 
+        Vector3 a(plane->point());
+        Vector3 n(plane->normal());
+        Vector3 pp(p->position());
+
+        //si AP.n est < 0, alors P est derrière le plan (chap7 p22)
+        if(Vector3(a,pp).dot(n) < 0) {
+            //H est le projeté orthogonal de P sur le plan.
+            //(on prend P auquel on donne le y du plan, H est sur le plan => HP est orthogonal au plan)
+            Vector3 H(pp.x(), plane->point().y(), pp.z());
+            p->position(H);
+            p->velocity(Vector3(0., 0., 0.));
+        }
+
+
         // appliquer les corrections calculées :
         p->addPositionCorrec(posCorrection);
         p->addVelocityCorrec(velCorrection);
