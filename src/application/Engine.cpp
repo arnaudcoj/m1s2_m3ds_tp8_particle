@@ -87,6 +87,8 @@ void Engine::collisionPlane() {
         //E2Q3
         //si AP.n est < 0, alors P est derrière le plan (chap7 p22)
         if(Vector3(a,pp).dot(n) < 0) {
+            Vector3 vp(p->velocity());
+
             //H est le projeté orthogonal de P sur le plan.
             //(on prend P auquel on donne le y du plan, H est sur le plan => HP est orthogonal au plan)
             //Vector3 H(pp.x(), plane->point().y(), pp.z());
@@ -95,9 +97,19 @@ void Engine::collisionPlane() {
             //p->velocity(Vector3(0., 0., 0.));
 
             //E2Q4
-            Vector3 vp(p->velocity());
             posCorrection.add(0., plane->point().y() - pp.y(), 0.);
             velCorrection.add(-vp.x(), -vp.y(), -vp.z());
+
+            //E2Q5
+            double restitution = 0.5;
+            //vitesse normale (chap7 p23)
+            Vector3 vnew = vp.dot(n) * n;
+
+            //On ajoute à nouveau la distance entre le plan et le point, en la diminuant en fonction de la restitution
+            posCorrection.add(0., (plane->point().y() - pp.y()) * restitution, 0.);
+            //on oppose la vitesse normale (restitution près), ce qui fait que la balle va se diriger vers le haut => rebond
+            //la restitution permet de diminuer la vitesse à chaque rebond => effet + réaliste
+            velCorrection.add(-vnew * restitution);
         }
 
 
