@@ -53,9 +53,9 @@ void Engine::computeForce() {
   for(unsigned int i=0; i<_particleList->size(); i++) {
     Particle *p=(*_particleList)[i];
     if (p->alive()) {
-      /* A COMPLETER : appliquer les forces subies */
-
-
+        //E2Q2 : poids = masse * gravité (cours chap7 p20), uniquement vers le bas
+        double gravity = 9.81; //gravité terrestre
+        p->addForce(Vector3(0., - p->mass() * gravity, 0.));
     }
   }
 }
